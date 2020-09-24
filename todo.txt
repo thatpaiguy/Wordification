@@ -1,0 +1,9 @@
+github clone repo, and move assets, push assets, delete old file
+
+game makes calls to files
+	-incorporate changes from script
+
+delete anaconda, install packages
+pip freeze > requirements.txt 
+pip install -r requirements.txt
+
