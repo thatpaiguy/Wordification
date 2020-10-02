@@ -221,8 +221,10 @@ class Game():
         self.button_choices[index].grid(row = 6, column = index)
 
     def mark_box_button_2(self, index, color, word):
+        j = 3
+        if index // 3 == 1:
+            j += 1
         self.button_choices[index].grid_forget()
-
         self.button_choices[index] = Button(self.game_canvas, \
                                             bg = color,
                                             text = '{:^15}'.format(self.graphemes[index]),
@@ -230,11 +232,7 @@ class Game():
                                             command=lambda \
                                             data = [index, self.graphemes[index]] :\
                                             self.submit_teach2(data))
-        j = 3
-        if index % 3 == 2:
-            j += 1
         self.button_choices[index].grid(row = j, column = index % 3)
-
 
     def play_again(self, data):
         if data == None:

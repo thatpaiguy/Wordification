@@ -142,13 +142,11 @@ class SortingGame(Game):
         if self.level == 1:
 
             self.target_patterns = ["49", "53"]
-            # TODO FIGURE OUT THE PARTNER VOWEL SOUNDS SECTION
             self.partner_vowel_sounds = ["iCe", "igh", "y"]
             target_word_count = 9
             partner_vowel_count = 3
             self.example_words = [Word("long I", "49", "-"),Word("long O", "53", "-")]
 
-            #self.target_patterns = [self.partner_phoneme, self.target_word_phoneme]
             for seq in self.target_patterns:
                 self.sideboard_map[seq] = 6
             self.target_word_list = self.generate_word_list(target_word_count, self.target_patterns[1])
@@ -244,14 +242,17 @@ class SortingGame(Game):
         '''
         #self.active_elements[-1].grid(row = 4, column = 0, columnspan = self.category_number)
 
+# creates the initial teaching board
     def create_board_teach(self):
         self.init_board_variables()
         self.draw_board_elements()
         self.button_choices = []
         self.sound_buttons = []
 
+        # for now, ignore the levels. functionality for level 1 is complete
         for i in range(self.categories):
             example_word = self.example_words[i]
+            # builds board; when button is clicked, jump to submit_teach method
             self.button_choices.append(Button(self.game_canvas, \
                                                 bg = flipped_down, \
                                                 text = '{:^15}'.format(self.example_words[i].word), \
@@ -296,12 +297,50 @@ class SortingGame(Game):
         audio_string = "../assets/audio/matching/%s.mp3" %(self.words_active[self.counter])
         self.enqueue_soundfiles(audio_string)
 
+    # displays sounds and plays audio when clicked
+    def show_sounds(self):
+        if not self.time_up() and not self.hints_active:
+            self.hints_active = True
+            print("Displaying sounds")
+            for i in range(len(self.button_choices)):
+                if len(self.sound_buttons) > 0 :
+                    self.sound_buttons[i].grid(row = 5, column = i)
+                self.button_choices[i].grid(row = 6, column = i)
+            if self.level == 1:
+                audio_string = "../assets/audio/sorting_click_vowel_sound.mp3"
+            elif self.level == 2:
+                audio_string = "../assets/audio/sorting_click_spelling_pattern.mp3"
+            elif self.level == 3:
+                audio_string = "../assets/audio/sorting_click_spelling_pattern_and_vowel_sound.mp3"
+            self.enqueue_soundfiles(audio_string)
+        elif self.time_up():
+            print("Going to breakdown or score from show_sounds()")
+            if self.exercise == "Teach":
+                # change this
+                self.main_menu()
+                # self.teach_breakdown()
+            elif self.exercise == "Test":
+                self.score()
 
-    # submits answer for teach function
+    # accessed from the board creation,
+    # sends data to check_answer
+    def submit_teach(self, data):
+        if not self.time_up():
+            #location of button within
+            index = data[0]
+            word = data[1]
+            self.check_answer(index, word)
+        else:
+            self.teach_breakdown()
+
+    # checks if correct vowel was clicked
+    # once again, only level 1 functionality is complete
     def check_answer(self, index, word):
         # check if the correct vowel was clicked
         if self.level == 1 :
             if self.target_patterns[index] != self.goal_word.phoneme:
+                # mark_box_button method can be found in game.py
+                # this method is what turns the box red
                 self.mark_box_button(index, incorrect, word)
                 self.marked_buttons.append(index)
                 audio_string = "../assets/audio/wrong_vowel_sound.mp3"
@@ -312,7 +351,7 @@ class SortingGame(Game):
                 # play soundfile
                 audio_string = "../assets/audio/right_vowel_sound.mp3"
                 self.enqueue_soundfiles(audio_string)
-                print('from check answer to grapheme')
+                # if answer is correct, move on to showing graphemes
                 self.show_graphemes()
                 return
 
@@ -369,13 +408,135 @@ class SortingGame(Game):
                 self.enqueue_soundfiles(audio_string)
                 self.move_to_next_word(word,index)
 
-    def move_to_next_word(self, word, index):
+    # shows graphemes to user
+    def show_graphemes(self):
         #reset incorrectly marked boxes
         self.hints_active = False
         for i in self.marked_entries:
             self.mark_box_entry(i, "white")
         for i in self.marked_buttons:
             self.mark_box_button(i, flipped_down, self.target_patterns[i])
+        self.marked_buttons = []
+        self.marked_entries = []
+
+        for i in range(self.categories):
+            self.sound_buttons[i].grid_forget()
+            self.button_choices[i].grid_forget()
+        self.button_choices = []
+        # creates each of the buttons for the grapheme board
+        # when button is clicked, jumps to submit_teach_graphemes
+        for i in range(len(self.graphemes)):
+            print(self.graphemes[i] + ' appending')
+            self.button_choices.append(
+                Button(
+                    self.game_canvas, \
+                    bg = flipped_down, \
+                    text = '{:^15}'.format(self.graphemes[i]), \
+                    font = self.app_font,\
+                    command=lambda \
+                    data = [i, self.graphemes[i]] :\
+                    self.submit_teach_graphemes(data)
+                )
+            )
+        if not self.time_up():
+            self.hints_active = True
+            print("Displaying graphemes")
+            j = 3
+            for i in range(len(self.button_choices)):
+                #if len(self.sound_buttons) > 0 :
+                #    self.sound_buttons[i].grid(row = 5, column = i)
+                self.button_choices[i].grid(row = j, column = i % 3)
+                if i % 3 == 2:
+                    j += 1
+            if self.level == 1:
+                audio_string = "../assets/audio/sorting_click_vowel_sound.mp3"
+            elif self.level == 2:
+                audio_string = "../assets/audio/sorting_click_spelling_pattern.mp3"
+            elif self.level == 3:
+                audio_string = "../assets/audio/sorting_click_spelling_pattern_and_vowel_sound.mp3"
+            self.enqueue_soundfiles(audio_string)
+        elif self.time_up():
+            print("Going to breakdown or score from show_graphemes()")
+            if self.exercise == "Teach":
+                # change this
+                self.main_menu()
+                # self.teach_breakdown()
+            elif self.exercise == "Test":
+                self.score()
+
+    # sends info to check_graphemes to check
+    # whether correct grapheme was selected
+    def submit_teach_graphemes(self, data):
+        if not self.time_up():
+            #location of button within
+            index = data[0]
+            word = data[1]
+            self.check_graphemes(index, word)
+        else:
+            self.teach_breakdown()
+
+    # checks whether correct grapheme was selected
+    def check_graphemes(self, index, word):
+        # check if the correct vowel was clicked
+        if self.level == 1 :
+            if self.graphemes[index] != self.goal_word.spelling_pattern:
+                self.mark_box_button_2(index, incorrect, word)
+                self.marked_buttons.append(index)
+                audio_string = "../assets/audio/wrong_vowel_sound.mp3"
+                self.enqueue_soundfiles(audio_string)
+                return
+
+            elif self.graphemes[index] == self.goal_word.spelling_pattern:
+                # play soundfile
+                audio_string = "../assets/audio/right_vowel_sound.mp3"
+                self.enqueue_soundfiles(audio_string)
+                print('in check answer')
+                for i in range(len(self.graphemes)):
+                    self.button_choices[i].grid_forget()
+                self.show_spelling()
+                return
+    # creates spelling box
+    def show_spelling(self):
+        self.entry_item = Entry(self.game_canvas, font = self.app_font)
+        self.entry_item.grid(row = 3, column = 0, columnspan = self.category_number)
+
+        self.active_elements.append(Button(self.game_canvas, \
+                    bg = flipped_down, font = self.app_font))
+        if self.exercise == "Test":
+            self.active_elements[-1].configure(
+                text = '{:^10}'.format("Submit"),
+                command = self.show_sounds)
+        elif self.exercise == "Teach":
+            self.active_elements[-1].configure(
+                text = '{:^10}'.format("Check spelling"),
+                command = self.check_spelling)
+        self.active_elements[-1].grid(row = 4, column = 0, columnspan = self.category_number)
+    # checks box input
+    def check_spelling(self):
+            # wrong spelling - mark spelling box incorrect
+            if not self.time_up():
+                print("%s == %s - %s" %(self.entry_item.get(), self.words_active[self.counter],  self.entry_item.get() == self.words_active[self.counter]))
+                if self.entry_item.get() != self.words_active[self.counter]:
+                    self.mark_box_entry(incorrect)
+                    audio_string = "../assets/audio/sorting_bad_spelling.mp3"
+                    self.enqueue_soundfiles(audio_string)
+                elif self.entry_item.get() == self.words_active[self.counter]: # word spelled correctly
+                    self.mark_box_entry("white")
+                    #self.hints_active = True
+                    print("playing sounds")
+                    # play right sound, "Congrats you typed the right word"
+                    audio_string = "../assets/audio/sorting_good_spelling.mp3"
+                    self.enqueue_soundfiles(audio_string)
+                    self.move_to_next_word(self.words_active[self.counter], self.counter)
+
+            elif self.time_up():
+                self.teach_breakdown()
+    # resets all boxes and goes to next word 
+    def move_to_next_word(self, word, index):
+        #reset incorrectly marked boxes
+        self.hints_active = False
+        for i in self.marked_entries:
+            self.mark_box_entry(i, "white")
         self.marked_buttons = []
         self.marked_entries = []
 
@@ -434,32 +595,6 @@ class SortingGame(Game):
                 bg = flipped_down, text = '{:^15}'.format("Hint"), font = self.app_font,\
                 command=lambda data = audio_string : self.play_again(data)))
         self.show_sounds()
-
-    def show_spelling(self):
-        self.entry_item = Entry(self.game_canvas, font = self.app_font)
-        self.entry_item.grid(row = 3, column = 0, columnspan = self.category_number)
-
-        self.active_elements.append(Button(self.game_canvas, \
-                    bg = flipped_down, font = self.app_font))
-        if self.exercise == "Test":
-            self.active_elements[-1].configure(
-                text = '{:^10}'.format("Submit"),
-                command = self.show_sounds)
-        elif self.exercise == "Teach":
-            self.active_elements[-1].configure(
-                text = '{:^10}'.format("Check spelling"),
-                command = self.check_spelling)
-        self.active_elements[-1].grid(row = 4, column = 0, columnspan = self.category_number)
-
-
-    def submit_teach(self, data):
-        if not self.time_up():
-            #location of button within
-            index = data[0]
-            word = data[1]
-            self.check_answer(index, word)
-        else:
-            self.teach_breakdown()
 
     def teach_breakdown(self):
         timer_queue.put(None)
@@ -610,132 +745,6 @@ class SortingGame(Game):
         self.entry_item.delete(0, 'end')
         for i in range(len(self.target_patterns)):
             self.button_choices[i].grid_forget()
-
-    def show_sounds(self):
-        if not self.time_up() and not self.hints_active:
-            self.hints_active = True
-            print("Displaying sounds")
-            for i in range(len(self.button_choices)):
-                if len(self.sound_buttons) > 0 :
-                    self.sound_buttons[i].grid(row = 5, column = i)
-                self.button_choices[i].grid(row = 6, column = i)
-            if self.level == 1:
-                audio_string = "../assets/audio/sorting_click_vowel_sound.mp3"
-            elif self.level == 2:
-                audio_string = "../assets/audio/sorting_click_spelling_pattern.mp3"
-            elif self.level == 3:
-                audio_string = "../assets/audio/sorting_click_spelling_pattern_and_vowel_sound.mp3"
-            self.enqueue_soundfiles(audio_string)
-        elif self.time_up():
-            print("Going to breakdown or score from show_sounds()")
-            if self.exercise == "Teach":
-                # change this
-                self.main_menu()
-                # self.teach_breakdown()
-            elif self.exercise == "Test":
-                self.score()
-
-    def show_graphemes(self):
-        #reset incorrectly marked boxes
-        self.hints_active = False
-        for i in self.marked_entries:
-            self.mark_box_entry(i, "white")
-        for i in self.marked_buttons:
-            self.mark_box_button(i, flipped_down, self.target_patterns[i])
-        self.marked_buttons = []
-        self.marked_entries = []
-
-        for i in range(self.categories):
-            self.sound_buttons[i].grid_forget()
-            self.button_choices[i].grid_forget()
-        self.button_choices = []
-        for i in range(len(self.graphemes)):
-            print(self.graphemes[i] + ' appending')
-            self.button_choices.append(
-                Button(
-                    self.game_canvas, \
-                    bg = flipped_down, \
-                    text = '{:^15}'.format(self.graphemes[i]), \
-                    font = self.app_font,\
-                    command=lambda \
-                    data = [i, self.graphemes[i]] :\
-                    self.submit_teach2(data)
-                )
-            )
-        if not self.time_up():
-            self.hints_active = True
-            print("Displaying graphemes")
-            j = 3
-            for i in range(len(self.button_choices)):
-                #if len(self.sound_buttons) > 0 :
-                #    self.sound_buttons[i].grid(row = 5, column = i)
-                self.button_choices[i].grid(row = j, column = i % 3)
-                if i % 3 == 2:
-                    j += 1
-            if self.level == 1:
-                audio_string = "../assets/audio/sorting_click_vowel_sound.mp3"
-            elif self.level == 2:
-                audio_string = "../assets/audio/sorting_click_spelling_pattern.mp3"
-            elif self.level == 3:
-                audio_string = "../assets/audio/sorting_click_spelling_pattern_and_vowel_sound.mp3"
-            self.enqueue_soundfiles(audio_string)
-        elif self.time_up():
-            print("Going to breakdown or score from show_graphemes()")
-            if self.exercise == "Teach":
-                # change this
-                self.main_menu()
-                # self.teach_breakdown()
-            elif self.exercise == "Test":
-                self.score()
-
-    def submit_teach2(self, data):
-        if not self.time_up():
-            #location of button within
-            index = data[0]
-            word = data[1]
-            self.check_grapheme(index, word)
-        else:
-            self.teach_breakdown()
-
-    def check_grapheme(self, index, word):
-        # check if the correct vowel was clicked
-        if self.level == 1 :
-            if self.graphemes[index] != self.goal_word.spelling_pattern:
-                self.mark_box_button_2(index, incorrect, word)
-                self.marked_buttons.append(index)
-                audio_string = "../assets/audio/wrong_vowel_sound.mp3"
-                self.enqueue_soundfiles(audio_string)
-                return
-
-            elif self.graphemes[index] == self.goal_word.spelling_pattern:
-                # play soundfile
-                audio_string = "../assets/audio/right_vowel_sound.mp3"
-                self.enqueue_soundfiles(audio_string)
-                print('in check answer')
-                for i in range(len(self.graphemes)):
-                    self.button_choices[i].grid_forget()
-                self.show_spelling()
-                return
-
-    def check_spelling(self):
-            # wrong spelling - mark spelling box incorrect
-            if not self.time_up():
-                print("%s == %s - %s" %(self.entry_item.get(), self.words_active[self.counter],  self.entry_item.get() == self.words_active[self.counter]))
-                if self.entry_item.get() != self.words_active[self.counter]:
-                    self.mark_box_entry(incorrect)
-                    audio_string = "../assets/audio/sorting_bad_spelling.mp3"
-                    self.enqueue_soundfiles(audio_string)
-                elif self.entry_item.get() == self.words_active[self.counter]: # word spelled correctly
-                    self.mark_box_entry("white")
-                    #self.hints_active = True
-                    print("playing sounds")
-                    # play right sound, "Congrats you typed the right word"
-                    audio_string = "../assets/audio/sorting_good_spelling.mp3"
-                    self.enqueue_soundfiles(audio_string)
-                    self.move_to_next_word(self.words_active[self.counter], self.counter)
-
-            elif self.time_up():
-                self.teach_breakdown()
 
     def mark_box_entry(self, color):
         word = self.entry_item.get()
