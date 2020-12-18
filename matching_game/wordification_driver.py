@@ -55,11 +55,11 @@ def get_csrftoken(client):
 
 def submit_results(client, _game_dat, _DEBUG):
     URL = "http://scholastechnology.com/post_data/"
-    
+
     DEBUG = _DEBUG
-    if DEBUG or _game_dat == {}:       
+    if DEBUG or _game_dat == {}:
         URL = "http://127.0.0.1:8000/post_data/"
-        _game_dat["time"] = 600      
+        _game_dat["time"] = 600
         _game_dat["complete"] = 11
         _game_dat["correct"] = 0
         _game_dat["total_categories"] = "aI,iCe,I"
@@ -120,7 +120,7 @@ def test_responses(payload, _DEBUG):
     print("Attempting login")
     client_response = try_login(client, username, password, _DEBUG)
     print("Login successful")
-   
+
     print("Attempting upload")
     client_response = submit_results(client, payload, _DEBUG)
     print("Upload successful")
@@ -142,7 +142,7 @@ class WordificationDriver():
         self.sm_font = font.Font(family = "Consolas",size=12)
         self.root.title('Wordification® - Main Menu')
 
-        license_text = "Wordification®/SpellingBits®"
+        license_text = "Wordification®"
         Label(self.root, text=license_text, font = self.sm_font).pack(fill=Y, side=BOTTOM, expand=FALSE)
 
         self.error_message = StringVar()
@@ -211,21 +211,13 @@ class WordificationDriver():
         self.menu_items["student"].grid(row = 0, column = 0, columnspan = 2)
         self.menu_items["welcome"] = Label(self.home_box, text = welcome_msg, font = self.head_font)
         self.menu_items["welcome"].grid(row = 1, column = 0, columnspan = 3)
-        sorting_test = "Sorting Game - Test - Level "
-        sorting_teach = "Sorting Game - Teach - Level "
-        matching_test = "Matching Game - Test - Level "
-        matching_teach = "Matching Game - Teach - Level "
         l = [0,2,4,6]
 
-        for i in range(1,4):
-            self.menu_items["sorting_test"] = Button(self.home_box, text = "%s %s" %(sorting_test, i), font = self.med_font, command=lambda data = ["Sorting","Test", i]: self.call_game_method(data))
-            self.menu_items["sorting_teach"] = Button(self.home_box, text = "%s %s" %(sorting_teach, i), font = self.med_font, command=lambda data = ["Sorting","Teach", i]: self.call_game_method(data))
-            self.menu_items["matching_test"] = Button(self.home_box, text = "%s %s" %(matching_test, i), font = self.med_font, command=lambda data = ["Matching","Test", i]: self.call_game_method(data))
-            self.menu_items["matching_teach"] = Button(self.home_box, text = "%s %s" %(matching_teach, i), font = self.med_font, command=lambda data = ["Matching","Teach", i]: self.call_game_method(data))
-            self.menu_items["sorting_test"].grid(row =l[i], column = 0)
-            self.menu_items["sorting_teach"].grid(row = l[i], column = 1)
-            self.menu_items["matching_test"].grid(row = l[i]+1, column =0)
-            self.menu_items["matching_teach"].grid(row = l[i]+1, column =1)
+        play = "Let's play!"
+
+        for i in range(1,2):
+            self.menu_items["play"] = Button(self.home_box, text = "%s" %(play), font = self.med_font, command=lambda data = ["Sorting","Teach", i]: self.call_game_method(data))
+            self.menu_items["play"].grid(row = l[i], column = 1)
 
         self.home_box.pack()
 
@@ -238,7 +230,7 @@ class WordificationDriver():
         if exercise == "Sorting":
             self.student.level = _level
             game = sorting.SortingGame(_type, self.student.level)
-              
+
         elif exercise == "Matching":
             self.student.level = _level
             game = matching.MatchingGame(_type, self.student.level)

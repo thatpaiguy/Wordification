@@ -86,7 +86,7 @@ colors = ["#f48042", "#caf441", "#41f4ac", "#41d0f4", "#4170f4", "#7f41f4", "#f4
 
 q = queue.Queue()
 timer_queue = queue.Queue()
-max_queue_size = 8
+max_queue_size = 20
 def worker():
     print("Worker spawned")
     while True:
@@ -129,6 +129,7 @@ class Game():
         self.UI["notification"] = None
         self.exercise = _exercise
         self.hints_active = False
+        self.attempts = 0
 
         mixer.init()
         # time_up = False
@@ -140,10 +141,10 @@ class Game():
         self.start_time = 0
         self.goal_word = ""
         self.global_hidden = '{:^20}'.format("\n~\n")
-        with open('../datafiles/game2words_v2.txt') as infile:
+        with open('../datafiles/game2words_v20.txt') as infile:
             for line in infile:
                 split_line = line.split()
-                new_word = Word(split_line[0], split_line[1], split_line[2])
+                new_word = Word(split_line[0], split_line[1], split_line[2], split_line[3])
                 self.word_map[new_word.phoneme].append(new_word)
                 self.word_map[new_word.spelling_pattern].append(new_word)
                 self.word_map[new_word.word] = new_word
@@ -194,7 +195,7 @@ class Game():
         print("Rendering Root")
         self.root = Tk()
         self.root.title('Wordification')
-        text3 = "Wordification®/SpellingBits® - Version 1"
+        text3 = "Wordification® - Version 1"
 
         self.root.configure(background=background)
         self.game_canvas = Canvas(self.root, bg =background)
@@ -237,6 +238,25 @@ class Game():
     def play_again(self, data):
         if data == None:
             data = "../assets/audio/matching/%s.mp3" %self.words_active[self.counter]
+        if data == 'instructions':
+            word = self.words_active[self.counter]
+            sounds = self.words_active[self.counter].sounds.split("|")
+            print(sounds)
+            audio_string1 = "../assets/newAudio/Phrases/introvsound.mp3, \
+                            ../assets/newAudio/Words/%s.mp3, \
+                            ../assets/newAudio/Phrases/introsentence.mp3, \
+                            ../assets/newAudio/Words/%s.mp3, \
+                            ../assets/newAudio/Sentences/%s_sentence.mp3, \
+                            ../assets/newAudio/Phrases/introsounds.mp3, \
+                            ../assets/newAudio/Words/%s.mp3, \
+                            ../assets/newAudio/Phrases/are2.mp3,"  %(word, word, word, word)
+            audio_string2 = ""
+            for sound in sounds:
+                audio_string2 += "../assets/newAudio/Sounds/" + sound + ".mp3,"
+            audio_string3 = "../assets/newAudio/Phrases/introvsoundselect.mp3, \
+                            ../assets/newAudio/Words/%s.mp3" %(word)
+            audio_string = audio_string1 + audio_string2 + audio_string3
+            self.enqueue_soundfiles(audio_string)
         if mixer.music.get_busy() == 0:
             self.enqueue_soundfiles(data)
 

@@ -1,10 +1,11 @@
 #word2.py
 
 class Word():
-	def __init__(self, _word, _phoneme, _grapheme):
+	def __init__(self, _word, _phoneme, _grapheme, _sounds):
 		self.word = _word
 		self.phoneme = _phoneme
 		self.spelling_pattern = _grapheme
+		self.sounds = _sounds
 
 	def __str__(self):
 		return "%s" %self.word
