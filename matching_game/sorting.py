@@ -621,6 +621,9 @@ class SortingGame(Game):
         self.progress['value']=int((self.counter/len(self.words_active))*100)
 
         self.button_choices = []
+        print('gotten to move to word')
+
+
         for i in range(self.categories):
             example_word = self.example_words[i]
             # builds board; when button is clicked, jump to submit_teach method
@@ -640,6 +643,8 @@ class SortingGame(Game):
             self.sound_buttons.append(Button(self.game_canvas, \
                 bg = flipped_down, text = '{:^15}'.format("Hint"), font = self.app_font,\
                 command=lambda data = audio_string : self.play_again(data)))
+
+        self.show_sounds()
 
     def teach_breakdown(self):
         timer_queue.put(None)
