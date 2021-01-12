@@ -465,7 +465,7 @@ class SortingGame(Game):
                                             ../assets/newAudio/Phrases/in.mp3, \
                                             ../assets/newAudio/Words/%s.mp3, \
                                             ../assets/newAudio/Phrases/not_spelled_with.mp3, \
-                                            ../assets/newAudio/Sounds/%s.mp3" %(self.goal_word.phoneme, self.words_active[self.counter], self.goal_word.spelling_pattern)
+                                            ../assets/newAudio/Sounds/%s.mp3" %(self.goal_word.phoneme, self.words_active[self.counter], self.graphemes[index])
                             self.enqueue_soundfiles(audio_string)
                         # the user selected the incorrect sound and incorrect spelling pattern
                         else:
