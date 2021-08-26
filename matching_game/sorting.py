@@ -11,6 +11,7 @@ import queue
 import os
 from resizingwindows import VertAndHorizScrolledFrame
 from game import Game
+
 """
 Verbal instruction about the
 game we're going to look for words that rhyme
@@ -202,7 +203,7 @@ class SortingGame(Game):
         # Instruction label, determined by exercise type
         activity_instructions = ""
         if self.exercise == "Teach":
-            activity_instructions = "Click the correct vowel sound."
+            activity_instructions = "  Click the correct vowel sound.  "
             self.active_elements.append(Button(self.game_canvas, \
                             bg = green, text = "Play Again",\
                             font = self.app_font, \
@@ -360,6 +361,14 @@ class SortingGame(Game):
 
     # shows graphemes to user
     def show_graphemes(self):
+
+        # dhruvs corrections
+        activity_instructions = "Click the correct spelling pattern."
+        # maybe go in and change the active element at index i
+        self.active_elements.append(Label(self.game_canvas, \
+            bg = green, text = activity_instructions, font = self.app_font))
+        self.active_elements[-1].grid(row = 1, column = 0, columnspan = self.width)
+
         #reset incorrectly marked boxes
         self.hints_active = False
         for i in self.marked_entries:
@@ -505,6 +514,15 @@ class SortingGame(Game):
                 return
     # creates spelling box
     def show_spelling(self):
+
+        # dhruvs corrections
+        activity_instructions = "          Spell the word           "
+
+        self.active_elements.append(Label(self.game_canvas, \
+            bg = green, text = activity_instructions, font = self.app_font))
+        self.active_elements[-1].grid(row = 1, column = 0, columnspan = self.width)
+
+
         self.attempts = 0
         self.entry_item = Entry(self.game_canvas, font = self.app_font)
         self.entry_item.grid(row = 3, column = 0, columnspan = self.category_number)

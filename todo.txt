@@ -1,9 +1,11 @@
-github clone repo, and move assets, push assets, delete old file
+not "click the correct  vowel sound" for oa, ow, oCe page
+disable "play again" at spelling pattern page
 
-game makes calls to files
-	-incorporate changes from script
+visual graphic of each letter as it says a letter
 
-delete anaconda, install packages
+NOTE: game only works on python 3.7.6
 pip freeze > requirements.txt 
 pip install -r requirements.txt
+
+when recording, make sure to cut off all hanging time
 
